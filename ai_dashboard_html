@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Business Insights Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            margin: 20px;
+        }
+        #container {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+            width: 80%;
+            margin: auto;
+        }
+        h1 {
+            color: #4caf50;
+        }
+        input, button, select {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #chart-container {
+            width: 100%;
+            height: 400px;
+        }
+        .metrics {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .metric {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 255, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>📊 AI-Powered Business Insights Dashboard</h1>
+        <input type="file" id="fileInput" accept=".csv">
+        <select id="chartType">
+            <option value="bar">Bar Chart</option>
+            <option value="line">Line Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="doughnut">Doughnut Chart</option>
+            <option value="radar">Radar Chart</option>
+            <option value="polarArea">Polar Chart</option>
+        </select>
+        <button onclick="processCSV()">📂 Upload & Analyze</button>
+        
+        <div class="metrics">
+            <div class="metric" id="totalRecords">📈 Total Records: 0</div>
+            <div class="metric" id="maxValue">🚀 Highest Value: 0</div>
+            <div class="metric" id="minValue">📉 Lowest Value: 0</div>
+        </div>
+
+        <div id="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        function processCSV() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a CSV file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const csvData = event.target.result;
+                const rows = csvData.split("\n").map(row => row.split(","));
+
+                if (rows.length < 2) {
+                    alert("Invalid CSV format.");
+                    return;
+                }
+
+                const labels = rows.slice(1).map(row => row[0]); 
+                const data = rows.slice(1).map(row => parseFloat(row[1])); 
+
+                document.getElementById('totalRecords').innerHTML = `📈 Total Records: ${data.length}`;
+                document.getElementById('maxValue').innerHTML = `🚀 Highest Value: ${Math.max(...data)}`;
+                document.getElementById('minValue').innerHTML = `📉 Lowest Value: ${Math.min(...data)}`;
+                
+                generateChart(labels, data);
+            };
+            reader.readAsText(file);
+        }
+
+        function generateChart(labels, data) {
+            const chartType = document.getElementById('chartType').value;
+            const ctx = document.getElementById('chart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Business Insights',
+                        data: data,
+                        backgroundColor: chartType === 'pie' || chartType === 'doughnut' ? 
+                            ['red', 'blue', 'green', 'yellow', 'purple', 'orange'] : 'green',
+                        borderColor: 'white',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutBounce'
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
